@@ -18,6 +18,7 @@ export class ChessUi {
     callback_load = null;
     callback_reset = null;
     callback_undo = null;
+    callback_chess960 = null;
 
     constructor(ui_div: HTMLDivElement) {
         this._ui_div = ui_div;
@@ -30,7 +31,8 @@ export class ChessUi {
             saveBtn = document.createElement("button"),
             loadBtn = document.createElement("button"),
             resetBtn = document.createElement("button"),
-            undoBtn = document.createElement("button");
+            undoBtn = document.createElement("button"),
+            chess960Btn = document.createElement("button");
 
         saveBtn.classList.add("success");
         resetBtn.classList.add("danger");
@@ -39,6 +41,7 @@ export class ChessUi {
         loadBtn.innerHTML = "📁 Load";
         resetBtn.innerHTML = "↻ Reset";
         undoBtn.innerHTML = "↶ Undo";
+        chess960Btn.innerHTML = "Play 960";
 
         saveBtn.onclick = (e) => { 
             this._click_save(e).then((saveGameName) => { 
@@ -50,6 +53,17 @@ export class ChessUi {
                 }
             }); 
         } 
+
+        chess960Btn.onclick = (e) => {
+            this._click_shuffle(e).then((value) => {
+                if(value === true) {
+                    if (typeof(this.callback_chess960) == 'function')
+                        this.callback_chess960(e);
+                    else
+                        this._click_fallback(e);
+                }
+            });
+        }
         
         loadBtn.onclick = (e) => {
             this._click_load(e).then((params) => {
@@ -83,7 +97,7 @@ export class ChessUi {
 
         undoBtn.onclick = typeof(this.callback_undo) == 'function' ? this.callback_undo : this._click_fallback;
 
-        aside.append(saveBtn, loadBtn, resetBtn, undoBtn);
+        aside.append(saveBtn, loadBtn, resetBtn, undoBtn, chess960Btn);
         this._ui_div.appendChild(aside);
     }
 
@@ -145,6 +159,15 @@ export class ChessUi {
     private _click_fallback(event: MouseEvent) {
         console.error("Click not implemented for " + (event.target as HTMLElement).innerHTML);
         return false;
+    }
+
+    private _click_shuffle(event): Promise<any> {
+        let title = "Shuffle Board for chess 960",
+        msg = "The board has been shuffled for chess 960",
+        modal: Modal;
+
+        modal = new Modal(title, msg, [true, "Ok"]);
+        return modal.show();
     }
 
     private _click_load(event): Promise<any> {

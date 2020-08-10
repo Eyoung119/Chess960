@@ -117,4 +117,17 @@ export abstract class Piece {
 
         return false;
     }
+
+    //new move
+    move960(cell: Cell) {
+        if(cell instanceof Cell) {
+            this._coord = cell.getCoord();
+            cell.piece = this;
+            this.possibleMoves = [];
+
+            return true;
+        }
+
+        return false;
+    }
 }

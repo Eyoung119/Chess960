@@ -23,7 +23,7 @@ export class Typechess {
     board: Board;
     match: Match;
 
-    constructor(canvas: HTMLCanvasElement, pieces_img: HTMLImageElement, ui_div: HTMLDivElement) {
+    constructor(canvas: HTMLCanvasElement, pieces_img: HTMLImageElement, ui_div: HTMLDivElement, isChess960: boolean = false) {
         this.board = new Board(canvas, pieces_img);
         this.ai = new ChessAi(this.board);
         this.ui = new ChessUi(ui_div);
@@ -31,13 +31,15 @@ export class Typechess {
 
         this.match.updateStatusCallback = (msg: string) => { return this.updateStatus(msg); };
 
-        this.setupPieces(this.match.team1);
-        this.setupPieces(this.match.team2);
-        
+        //if these are gonna be called with the check add false to them
+        this.setupPieces(this.match.team1, isChess960);
+        this.setupPieces(this.match.team2, isChess960);
+       
         this.ui.callback_load = (savedGame) => { return this.loadGame(savedGame); };
-        this.ui.callback_reset = (e) => { return this.reset(); };
+        this.ui.callback_reset = (e) => { return this.reset(false); };
         this.ui.callback_save = (saveName) => { return this.saveGame(saveName); };
         this.ui.callback_undo = (e) => { return this.undoMove(); };
+        this.ui.callback_chess960 = (e) => { return this.reset(true); };
 
         return this;
     }
@@ -95,6 +97,88 @@ export class Typechess {
         this.ui.draw(this.match.getWhiteTeam().getScore(), 
             this.match.getBlackTeam().getScore(),
             this.match.turns);
+    }
+
+
+    setupPieces(team: Team, isChess960: boolean = false) {
+        if(isChess960 == false) {
+                let filesArr = Object.keys(FILE),
+                pawnRank = team.side == SIDE.white ? "2" : "7",
+                rank = team.side == SIDE.white ? '1' : '8';
+
+            team.pieces.forEach((piece, i) => {
+                let coord: string = '';
+                
+                // pawns
+                if(i < filesArr.length && piece.type == PIECETYPE.pawn)
+                    coord = filesArr[i + (filesArr.length / 2)] + pawnRank;
+                // rooks
+                else if(i == 8) coord = "a" + rank;
+                else if(i == 9) coord = "h" + rank;
+                // knights
+                else if(i == 10) coord = "b" + rank;
+                else if(i == 11) coord = "g" + rank;
+                // bishops
+                else if(i == 12) coord = "c" + rank;
+                else if(i == 13) coord = "f" + rank;
+                // royalty
+                else if(i == 14) coord = "d" + rank;
+                else if(i == 15) coord = "e" + rank;
+
+                piece.move(this.board.getCellByCoord(coord));
+            });
+        }
+        else {
+
+            //shuffle for king
+            let kingShuffle = Math.floor(Math.random() * 7);
+            //reg shuffle for 1-8
+            let shuffle = Math.floor(Math.random() * 8) + 1;
+            
+            let filesArr = Object.keys(FILE),
+            pawnRank = team.side == SIDE.white ? "2" : "7",
+            rank = team.side == SIDE.white ? '1' : '8';
+
+            let num;
+            if(num % 2 == 0) {
+
+            }
+            else {
+
+            }
+
+            team.pieces.forEach((piece, i) => {
+                let coord: string = '';
+                // pawns
+                if(i < filesArr.length && piece.type == PIECETYPE.pawn) {
+                    coord = filesArr[i + (filesArr.length / 2)] + pawnRank;
+                }
+                //Knights
+                if(PIECETYPE.knight) {
+                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                }
+                //bishops
+                if(PIECETYPE.bishop) {
+                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                }
+                //Queen
+                if(PIECETYPE.queen) {
+                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                }
+                //Rook
+                if(PIECETYPE.rook) {
+                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                }
+                  //kings
+                if(PIECETYPE.king) {
+                    console.log("King placed");
+                    coord =  filesArr[kingShuffle + (filesArr.length / 2)] + rank;
+                }
+                console.log(coord);
+                piece.move960(this.board.getCellByCoord(coord));
+            });
+            }
+       
     }
 
     loadGame(savedGame: SaveGame) {
@@ -164,8 +248,8 @@ export class Typechess {
         (new Modal(modalTitle, "\"" + savedGame.name + "\" loaded successfully!")).show();
     }
 
-    reset() {
-        this.constructor(this.board.canvas, this.board.pieces_img, this.ui.getUiDiv());
+    reset(isChess960: boolean = false) {
+        this.constructor(this.board.canvas, this.board.pieces_img, this.ui.getUiDiv(), isChess960);
         this.draw();
     }
 
@@ -185,33 +269,6 @@ export class Typechess {
         }
     }
 
-    setupPieces(team: Team) {
-        let filesArr = Object.keys(FILE),
-            pawnRank = team.side == SIDE.white ? "2" : "7",
-            rank = team.side == SIDE.white ? '1' : '8';
-
-        team.pieces.forEach((piece, i) => {
-            let coord: string = '';
-            
-            // pawns
-            if(i < filesArr.length && piece.type == PIECETYPE.pawn)
-                coord = filesArr[i + (filesArr.length / 2)] + pawnRank;
-            // rooks
-            else if(i == 8) coord = "a" + rank;
-            else if(i == 9) coord = "h" + rank;
-            // knights
-            else if(i == 10) coord = "b" + rank;
-            else if(i == 11) coord = "g" + rank;
-            // bishops
-            else if(i == 12) coord = "c" + rank;
-            else if(i == 13) coord = "f" + rank;
-            // royalty
-            else if(i == 14) coord = "d" + rank;
-            else if(i == 15) coord = "e" + rank;
-
-            piece.move(this.board.getCellByCoord(coord));
-        });
-    }
 
     undoMove() {
         if(this.match.turns.length == 0)

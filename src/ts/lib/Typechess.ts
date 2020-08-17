@@ -130,55 +130,94 @@ export class Typechess {
         }
         else {
 
+            //exclude left and right numbers from an array
+
             //shuffle for king
             let kingShuffle = Math.floor(Math.random() * 7);
-            //reg shuffle for 1-8
-            let shuffle = Math.floor(Math.random() * 8) + 1;
+
+            //shuffle for rook
+            let rookShuffle = [this.shuffle([0,1,2,3,4,5,6,7], [...this.getLeftNumber(kingShuffle), kingShuffle])];
+            rookShuffle.push(this.shuffle([0,1,2,3,4,5,6,7], [kingShuffle, ...this.getRightNumber(kingShuffle)]));
+
+            //shuffle for bishop
+            let bishopShuffle =[this.shuffle([1,3,5,7], [kingShuffle, ...rookShuffle])];
+            bishopShuffle.push(this.shuffle([0,2,4,6], [kingShuffle, ...rookShuffle, bishopShuffle[0]]));
+
+            //shuffle for knight
+            let knightShuffle =[this.shuffle([0,1,2,3,4,5,6,7], [kingShuffle, ...rookShuffle, ...bishopShuffle])];
+            knightShuffle.push(this.shuffle([0,1,2,3,4,5,6,7], [kingShuffle, ...rookShuffle, ...bishopShuffle, knightShuffle[0]]));
+            //shuffle for Queen
+            let queenShuffle = this.shuffle([0,1,2,3,4,5,6,7], [kingShuffle, ...rookShuffle, ...bishopShuffle, ...knightShuffle]);
             
             let filesArr = Object.keys(FILE),
             pawnRank = team.side == SIDE.white ? "2" : "7",
-            rank = team.side == SIDE.white ? '1' : '8';
+            rank = team.side == SIDE.white ? "1" : "8";
 
-            let num;
-            if(num % 2 == 0) {
-
-            }
-            else {
-
-            }
+            let kCount = 0;
+            let bCount = 0;
+            let rCount = 0;
 
             team.pieces.forEach((piece, i) => {
                 let coord: string = '';
-                // pawns
-                if(i < filesArr.length && piece.type == PIECETYPE.pawn) {
+                //pawns
+                if(i < filesArr.length && piece.type === PIECETYPE.pawn) {
                     coord = filesArr[i + (filesArr.length / 2)] + pawnRank;
                 }
                 //Knights
-                if(PIECETYPE.knight) {
-                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                if(piece.type === PIECETYPE.knight) {
+                    coord =  filesArr[knightShuffle[kCount] + (filesArr.length / 2)] + rank;
+                    kCount++;
                 }
                 //bishops
-                if(PIECETYPE.bishop) {
-                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                if(piece.type === PIECETYPE.bishop) {
+                    coord =  filesArr[bishopShuffle[bCount] + (filesArr.length / 2)] + rank;
+                    bCount++;
                 }
                 //Queen
-                if(PIECETYPE.queen) {
-                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                if(piece.type === PIECETYPE.queen) {
+                    coord =  filesArr[queenShuffle + (filesArr.length / 2)] + rank;
                 }
                 //Rook
-                if(PIECETYPE.rook) {
-                    coord =  filesArr[shuffle + (filesArr.length / 2)] + rank;
+                if(piece.type === PIECETYPE.rook) {
+                    coord =  filesArr[rookShuffle[rCount] + (filesArr.length / 2)] + rank;
+                    rCount++;
                 }
                   //kings
-                if(PIECETYPE.king) {
-                    console.log("King placed");
+                if(piece.type === PIECETYPE.king) {
                     coord =  filesArr[kingShuffle + (filesArr.length / 2)] + rank;
                 }
-                console.log(coord);
+                // console.log(coord);
                 piece.move960(this.board.getCellByCoord(coord));
             });
-            }
+        }
        
+    }
+
+    getLeftNumber(kingPosition: number) {
+        let leftArr: Array<number> = [];
+        for(let i = 0; i < kingPosition; i++) {
+            leftArr.push(i);
+        }
+        return leftArr;
+    }
+
+    getRightNumber(kingPosition: number) {
+        let rightArr: Array<number> = [];
+        for(let i = kingPosition + 1; i < 8; i++) {
+            rightArr.push(i);
+        }
+        return rightArr;
+    }
+
+    //remove all excluded from possible. Generate new index within possible
+    //return possible at that index
+    shuffle(possible: Array<number>, excluded: Array<number>): number {
+        excluded.forEach(element => {
+            if(possible.indexOf(element) !== -1) {
+                possible.splice(possible.indexOf(element), 1);     
+            }
+        });
+        return possible[Math.floor(Math.random() * possible.length)];
     }
 
     loadGame(savedGame: SaveGame) {

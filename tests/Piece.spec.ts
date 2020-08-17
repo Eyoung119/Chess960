@@ -57,18 +57,11 @@ describe('Test Piece', () => {
         });
     });
 
+    //960 test here
     describe('getPieceType()', () => {
         it('should return a human-readable string of the piece\'s type', () => {
             let piece = PieceFactory();
             expect(piece.getPieceType()).to.equal("Pawn");
-        });
-    });
-    describe('getSide()', () => {
-        it('should return a human-readable string of the piece\'s side', () => {
-            let piece = PieceFactory();
-            expect(piece.getSide()).to.satisfy(output => {
-                return !!(output == "White" || output == "Black");
-            });
         });
     });
 

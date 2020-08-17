@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { NUMFILES, NUMRANKS } from '../src/ts/globals';
 import { Board } from '../src/ts/lib/Board';
-import { BoardFactory } from './factories';
+import { BoardFactory, PieceFactory } from './factories';
 import { Cell } from '../src/ts/lib/Cell';
 import 'mocha';
 
@@ -79,4 +79,54 @@ describe('Test Board', () => {
             expect(cell).to.be.instanceOf(Cell);
         })
     });
+
+    //Some more 960
+    describe('move960()', () => {
+        it('should force movement from the 960 gameplay', () => {
+            let piece = this.move960();
+            expect(piece.getPieceType());
+        });
+    });
+
+    describe('getLeftNumber()', () => {
+        it('should get the left part of an array before the index', () => {
+            let kingPosition: number;
+            let leftArr: Array<number> = [];
+            for(let i = 0; i < kingPosition; i++) {
+                leftArr.push(i);
+            }
+            return leftArr;
+            expect(leftArr.includes(0));
+        });
+    });
+
+    describe('getCoord()', () => {
+        it('should return an empty string if the cell is empty or not occupied', () => {
+            let piece = PieceFactory();
+            expect(piece.getCoord()).to.equal('');
+        });
+        it('should return the index that the state is occupied', () => {
+            let cell: Cell;
+            if(cell instanceof Cell && this.possibleMoves.includes(cell.getCoord())) {
+                this._coord = cell.getCoord();
+                this.cell.piece = this;
+                this.possibleMoves = [];
+    
+                return true;
+            }
+    
+            return false;
+        });
+        expect(true);
+    });
+
+    describe('getSide()', () => {
+        it('should return a string of the side the piece is on', () => {
+            let piece = PieceFactory();
+            expect(piece.getSide()).to.satisfy(output => {
+                return !!(output == "White" || output == "Black");
+            });
+        });
+    });
+
 });
